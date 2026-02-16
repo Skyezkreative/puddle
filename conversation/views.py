@@ -42,7 +42,12 @@ def new_conversation(request, item_pk):
 
 @login_required
 def inbox(request):
-    conversations = Conversation.objects.filter(members__in=[request.user.id])
+    conversations = Conversation.objects.filter(members__in=[request.user.id]).prefetch_related('message', 'members')
+    
+    # Add latest message to each conversation
+    for conversation in conversations:
+        messages = conversation.message.all().order_by('created_at')
+        conversation.latest_message = messages.last() if messages.exists() else None
 
     return render(request, 'conversation/inbox.html', {
         'conversations': conversations

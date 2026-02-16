@@ -3,26 +3,42 @@
 {% block title %}Inbox{% endblock %}
 
 {% block content %}
-<h1 class="mb-6 text-3xl">Inbox</h1>
+<h1 class="mb-6 text-2xl md:text-3xl font-bold">Inbox</h1>
 
-<div class="space-y-6">
+<div class="space-y-4">
     {% for conversation in conversations %}
-        <a href="{% url 'conversation:detail' conversation.id %}">
-            <div class="p-6 flex bg-gray-100 rounded-xl">
-                <div class="pr-6">
-                    <img src="{{ conversation.item.image.url }}" class="w-20 rounded-xl">
+        <div class="p-4 md:p-6 bg-gray-100 rounded-xl hover:shadow-lg transition">
+            <a href="{% url 'conversation:detail' conversation.id %}" class="flex flex-col sm:flex-row gap-4">
+                <div class="flex-shrink-0">
+                    <img src="{{ conversation.item.image.url }}" class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover">
                 </div>
 
-                <div>
+                <div class="flex-1 min-w-0">
                     {% for member in conversation.members.all %}
                         {% if member != request.user %}
-                            <p class="mb-4"><strong>{{ member.username }}</strong> | {{ conversation.modified_at }}</p>
-                            <p>{{ conversation.item.name }}</p>
+                            <p class="font-semibold text-sm md:text-base text-gray-900">{{ member.username }}</p>
                         {% endif %}
                     {% endfor %}
+                    <p class="text-gray-600 text-xs md:text-sm mt-1">{{ conversation.modified_at }}</p>
+                    <p class="text-gray-700 text-sm md:text-base truncate mt-2">{{ conversation.item.name }}</p>
                 </div>
+            </a>
+
+            <!-- Latest Message Preview -->
+            <div class="mt-4 pt-4 border-t border-gray-300">
+                {% if conversation.latest_message %}
+                    <div class="p-3 bg-white rounded-lg">
+                        <div class="flex flex-col sm:flex-row sm:justify-between gap-2 mb-2">
+                            <p class="font-semibold text-xs md:text-sm text-gray-700">{{ conversation.latest_message.created_by.username }}</p>
+                            <p class="text-xs text-gray-500">{{ conversation.latest_message.created_at|date:"M d, H:i" }}</p>
+                        </div>
+                        <p class="text-xs md:text-sm text-gray-800 break-words line-clamp-2">{{ conversation.latest_message.content }}</p>
+                    </div>
+                {% else %}
+                    <p class="text-xs md:text-sm text-gray-500 italic">No messages yet</p>
+                {% endif %}
             </div>
-        </a>
+        </div>
     {% endfor %}
 </div>
 {% endblock %}
